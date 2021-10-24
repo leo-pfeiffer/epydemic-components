@@ -22,7 +22,7 @@ def dataframe():
     lab[SIR.P_INFECTED] = 0.01
     lab[SIR.P_INFECT] = 0.001
     lab[SIR.P_REMOVE] = 0.01
-    lab[Monitor.DELTA] = 10
+    lab[Monitor.DELTA] = 1
     lab['repetitions'] = range(5)
 
     e = StochasticDynamics(ProcessSequence([SIR(), Monitor()]), ERNetwork())
@@ -48,8 +48,9 @@ def json():
 
 
 if __name__ == '__main__':
-    dataframe()
-    json()
+    # dataframe()   # try this with a local lab
+    # json()        # try this from a JSON file
+    ...
 
 
 

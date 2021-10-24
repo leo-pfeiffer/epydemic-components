@@ -1,6 +1,7 @@
 import pandas as pd
 from epyc import LabNotebook
 from epydemic import Monitor
+from functools import reduce
 
 
 class LabDataFrame:
@@ -41,25 +42,35 @@ class LabDataFrame:
         num_experiments = len(self._df)
         experiment_ids = self._df.index.tolist()
 
-        # lists that will hold the values that we need to fill in
+        # lists that will hold the values for the long data frame
         ls_experiment_id = []  # experiment id
         ls_time = []  # time step
         ls_keys = []  # what the value refers to, e.g. a compartment
         ls_value = []  # the value of the observation
 
+        # time steps of the observations
         time_steps = self._get_time_steps()
-
         num_observations = len(time_steps)
 
+        # for each key, fill the lists
         for key in ts_keys:
+            # data frame with time series
             ts = self._get_key_df(key, time_steps)
+
+            # put the data into the `value` column
+            ls_value += reduce(lambda a, b: a + b, ts.values.tolist())
+
+            # fill in the experiment IDs ...
             ls_experiment_id += [
                 experiment_ids[i] for i in range(num_experiments)
                 for _ in range(num_observations)
             ]
+
+            # ... and the key
             ls_keys += [key] * num_experiments * len(time_steps)
+
+            # ... and the time steps
             ls_time += time_steps * num_experiments
-            ls_value += sum(ts.values.tolist(), [])
 
         self._long = pd.DataFrame({
             'experiment_id': ls_experiment_id,
@@ -88,5 +99,8 @@ class LabDataFrame:
         :return:
         """
         tss = self._df[Monitor.timeSeriesForLocus(ts_key)]
-        return pd.DataFrame(tss.values.tolist()).rename(
-            columns=lambda i: time_steps[i])
+
+        # return pd.DataFrame(tss.values.tolist()).rename(
+        #     columns=lambda i: time_steps[i])
+
+        return pd.DataFrame(tss.values.tolist(), columns=time_steps)
