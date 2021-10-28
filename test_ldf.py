@@ -31,6 +31,7 @@ def dataframe():
     keys = [SIR.INFECTED]
     test_ldf(lab.dataframe(), keys)
 
+
 def json():
     with JSONLabNotebook(name='seir_mobility_pre.json').open() as nb:
         nb_df = nb.dataframe()
@@ -51,6 +52,3 @@ if __name__ == '__main__':
     # dataframe()   # try this with a local lab
     # json()        # try this from a JSON file
     ...
-
-
-

@@ -1,3 +1,6 @@
+from typing import List, Callable
+
+import numpy as np
 import pandas as pd
 from epyc import LabNotebook
 from epydemic import Monitor
@@ -32,7 +35,7 @@ class LabDataFrame:
     def from_lab_notebook(notebook: LabNotebook):
         return LabDataFrame(notebook.dataframe())
 
-    def to_long(self, ts_keys: list[str]):
+    def to_long(self, ts_keys: List[str]):
         """
         Convert to long format data frame
         :param ts_keys: List of time series keys for the data frame,
@@ -100,7 +103,27 @@ class LabDataFrame:
         """
         tss = self._df[Monitor.timeSeriesForLocus(ts_key)]
 
-        # return pd.DataFrame(tss.values.tolist()).rename(
-        #     columns=lambda i: time_steps[i])
-
         return pd.DataFrame(tss.values.tolist(), columns=time_steps)
+
+    def group_apply(self, func: Callable):
+        """
+        Apply the `func` callable to the long data frame.
+        :param func: A callable to be applied to the dataframe
+        :return: The data frame grouped by time and key with the `func` applied.
+        """
+        grouped = self.long.groupby(['time', 'key']).apply(func)
+        grouped.reset_index(inplace=True)
+        return grouped
+
+    def group_mean(self):
+        """
+        Calculate the mean value per time per key column of the long df.
+        """
+        return self.group_apply(np.mean)
+
+    def group_std(self):
+        """
+        Standard deviation per time per value in key column of the long df.
+        :return:
+        """
+        return self.group_apply(np.std)
