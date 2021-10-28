@@ -8,6 +8,8 @@ def test_ldf(df, keys):
     ldf = LabDataFrame(df)
     ldf.to_long(keys)
     long = ldf.long
+    mean = ldf.group_mean()
+    std = ldf.group_std()
     return long
 
 
@@ -50,5 +52,5 @@ def json():
 
 if __name__ == '__main__':
     # dataframe()   # try this with a local lab
-    # json()        # try this from a JSON file
+    json()        # try this from a JSON file
     ...

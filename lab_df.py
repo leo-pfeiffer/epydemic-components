@@ -111,19 +111,29 @@ class LabDataFrame:
         :param func: A callable to be applied to the dataframe
         :return: The data frame grouped by time and key with the `func` applied.
         """
-        grouped = self.long.groupby(['time', 'key']).apply(func)
-        grouped.reset_index(inplace=True)
-        return grouped
+        raise NotImplementedError
+        # grouped = self.long.groupby(['time', 'key']).mean()
+        # grouped.reset_index(level=0, drop=True, inplace=True).reset_index(
+        #     inplace=True)
+        # return grouped
 
     def group_mean(self):
         """
         Calculate the mean value per time per key column of the long df.
         """
-        return self.group_apply(np.mean)
+        # return self.group_apply(np.mean)
+        grouped = self.long.groupby(['time', 'key']).mean()
+        grouped.reset_index(inplace=True)
+        grouped.drop(['experiment_id'], axis=1, inplace=True)
+        return grouped
 
     def group_std(self):
         """
         Standard deviation per time per value in key column of the long df.
         :return:
         """
-        return self.group_apply(np.std)
+        # return self.group_apply(np.std)
+        grouped = self.long.groupby(['time', 'key']).std()
+        grouped.reset_index(inplace=True)
+        grouped.drop(['experiment_id'], axis=1, inplace=True)
+        return grouped
