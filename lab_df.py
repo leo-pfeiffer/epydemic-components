@@ -30,7 +30,7 @@ class LabDataFrame:
     @property
     def locus_keys(self):
         return self._locus_keys
-    
+
     @locus_keys.setter
     def locus_keys(self, locus_keys):
         assert isinstance(locus_keys, list)
@@ -39,7 +39,7 @@ class LabDataFrame:
                 raise ValueError(f'The provided locus key {key} is not in the'
                                  f'columns of LabDataFrame.df')
         self._locus_keys = locus_keys
-    
+
     @property
     def param_keys(self):
         return self._param_keys
@@ -164,32 +164,25 @@ class LabDataFrame:
         :param func: A callable to be applied to the dataframe
         :return: The data frame grouped by time and key with the `func` applied.
         """
-        raise NotImplementedError
-        # grouped = self.formatted.groupby(['time', 'key']).mean()
-        # grouped.reset_index(level=0, drop=True, inplace=True).reset_index(
-        #     inplace=True)
-        # return grouped
+
+        grouped = self.formatted[['experiment_id', 'time', 'key', 'value']]
+        grouped = grouped.groupby(['time', 'key']).agg(func)
+        grouped.reset_index(inplace=True)
+        grouped.drop(['experiment_id'], axis=1, inplace=True)
+        return grouped
 
     def group_mean(self):
         """
         Calculate the mean value per time per key column of the formatted df.
         """
-        # return self.group_apply(np.mean)
-        grouped = self.formatted.groupby(['time', 'key']).mean()
-        grouped.reset_index(inplace=True)
-        grouped.drop(['experiment_id'], axis=1, inplace=True)
-        return grouped
+        return self.group_apply(np.mean)
 
     def group_std(self):
         """
         Standard deviation per time per value in key column of the formatted df.
         :return:
         """
-        # return self.group_apply(np.std)
-        grouped = self.formatted.groupby(['time', 'key']).std()
-        grouped.reset_index(inplace=True)
-        grouped.drop(['experiment_id'], axis=1, inplace=True)
-        return grouped
+        return self.group_apply(np.std)
 
     def filter(self, filters: Dict[str, Any]) -> pd.DataFrame:
         """

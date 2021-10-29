@@ -4,8 +4,9 @@ lab_df.py contains the LabDataFrame class, which can be used to transform
 a common epydemic data frame.
 
 So far implemented:
-- Transformation to long data format (needed for most components)
+- LabDataFrame class as a wrapper to get the lab dataframe into the right format
+- Started on components library
 
 Todo:
-- Transformation to wide data format
-- ...
+- Finish a working example with the compartment curve graph
+- Create a unified way of handling layout, etc...

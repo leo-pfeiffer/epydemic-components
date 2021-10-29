@@ -38,12 +38,13 @@ def dataframe():
     lab.runExperiment(e)
 
     keys = [SIR.INFECTED]
-    test_ldf(lab.dataframe(), keys)
+    test_ldf(lab.dataframe(), keys, [])
 
 
 def json():
-    # with JSONLabNotebook(name='seir_mobility_pre.json').open() as nb:
-    with JSONLabNotebook(name='seirq_plc_pre.json').open() as nb:
+    # file_name = 'tests/test_data/seir_mobility_pre.json'
+    file_name = 'tests/test_data/seirq_plc_pre.json'
+    with JSONLabNotebook(name=file_name).open() as nb:
         nb_df = nb.dataframe()
 
     ts_keys = [
