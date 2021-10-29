@@ -1,7 +1,11 @@
 # epydemic-components
 
-lab_df.py contains the LabDataFrame class, which can be used to transform
+`lab_df.py` contains the LabDataFrame class, which can be used to transform
 a common epydemic data frame.
+
+`components/` contains the available plotly components
+
+`tests/` ... self-explanatory
 
 So far implemented:
 - LabDataFrame class as a wrapper to get the lab dataframe into the right format
