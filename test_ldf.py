@@ -6,7 +6,11 @@ from lab_df import LabDataFrame
 
 def test_ldf(df, ts_keys, param_keys):
     ldf = LabDataFrame(df)
-    ldf.format(ts_keys, param_keys)
+
+    ldf.locus_keys = ts_keys
+    ldf.param_keys = param_keys
+
+    ldf.format()
     formatted = ldf.formatted
     mean = ldf.group_mean()
     std = ldf.group_std()

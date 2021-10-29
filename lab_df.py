@@ -9,11 +9,15 @@ from functools import reduce
 
 class LabDataFrame:
 
-    def __init__(self, df=None):
+    def __init__(self, df: Optional[pd.DataFrame] = None):
+
         if df is not None:
             assert isinstance(df, pd.DataFrame)
+
         self._df = df
         self._formatted = None
+        self._locus_keys = None
+        self._param_keys = None
 
     @property
     def df(self):
@@ -22,6 +26,32 @@ class LabDataFrame:
     @df.setter
     def df(self, df):
         self._df = df
+
+    @property
+    def locus_keys(self):
+        return self._locus_keys
+    
+    @locus_keys.setter
+    def locus_keys(self, locus_keys):
+        assert isinstance(locus_keys, list)
+        for key in locus_keys:
+            if not Monitor.timeSeriesForLocus(key) in self.df.columns:
+                raise ValueError(f'The provided locus key {key} is not in the'
+                                 f'columns of LabDataFrame.df')
+        self._locus_keys = locus_keys
+    
+    @property
+    def param_keys(self):
+        return self._param_keys
+
+    @param_keys.setter
+    def param_keys(self, param_keys):
+        assert isinstance(param_keys, list)
+        for key in param_keys:
+            if not key in self.df.columns:
+                raise ValueError(f'The provided parameter key {key} is not in'
+                                 f'the columns of LabDataFrame.df')
+        self._param_keys = param_keys
 
     @property
     def formatted(self):
@@ -35,18 +65,27 @@ class LabDataFrame:
     def from_lab_notebook(notebook: LabNotebook):
         return LabDataFrame(notebook.dataframe())
 
-    def format(self, ts_keys: List[str],
+    def format(self, locus_keys: Optional[List[str]] = None,
                param_keys: Optional[List[str]] = None):
         """
         Convert to correct format data frame
-        :param ts_keys: List of time series keys for the data frame,
+        :param locus_keys: List of time series keys for the data frame,
         e.g. SIR.INFECTED
         :param param_keys: List of param keys for the data frame,
         e.g. SEIRWithQuarantine.p_quarantine
         """
 
+        if locus_keys is None:
+            if self.locus_keys is None:
+                raise TypeError('Argument locus_keys must be specified if '
+                                'LabDataFrame.locus_keys is not set.')
+            locus_keys = self.locus_keys
+
         if param_keys is None:
-            param_keys = []
+            if self.param_keys is not None:
+                param_keys = self.param_keys
+            else:
+                param_keys = []
 
         num_experiments = len(self._df)
         experiment_ids = self._df.index.tolist()
@@ -57,17 +96,17 @@ class LabDataFrame:
 
         # initialise fill values
         fill = dict(
-            experiment_id=[],   # experiment id
-            time=[],            # time step
-            key=[],             # what the value refers to, e.g. a compartment
-            value=[]            # the value of the observation
+            experiment_id=[],  # experiment id
+            time=[],  # time step
+            key=[],  # what the value refers to, e.g. a compartment
+            value=[]  # the value of the observation
         )
 
-        for pk in param_keys:   # parameter keys
+        for pk in param_keys:  # parameter keys
             fill[pk] = []
 
         # for each key, fill the lists
-        for key in ts_keys:
+        for key in locus_keys:
             # data frame with time series
             ts = self._get_key_df(key, time_steps)
 
