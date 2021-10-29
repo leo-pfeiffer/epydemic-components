@@ -10,6 +10,9 @@ def test_ldf(df, ts_keys, param_keys):
     formatted = ldf.formatted
     mean = ldf.group_mean()
     std = ldf.group_std()
+    f_key = 'epydemic.SEIRWithQuarantine.p_quarantine'
+    f_value = 0.5
+    filtered = ldf.filter({f_key: f_value})
     return formatted
 
 

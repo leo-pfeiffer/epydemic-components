@@ -172,15 +172,12 @@ class LabDataFrame:
         :return: filtered df
         """
 
-        # todo
-        raise NotImplementedError
+        # create array with true values only
+        arr = np.array([True] * len(df))
 
-        # # create array with true values only
-        # arr = np.array([True] * len(df))
-        #
-        # for k, v in filters.items():
-        #     # define filter (taking into account floating point imprecision) and
-        #     #  combine with previous filters
-        #     arr = arr & (lambda x: np.isclose(x, v))(df[k].values)
-        #
-        # return df.loc[arr]
+        for k, v in filters.items():
+            # define filter (taking into account floating point imprecision) and
+            #  combine with previous filters
+            arr = arr & (lambda x: np.isclose(x, v))(df[k].values)
+
+        return df.loc[arr]
