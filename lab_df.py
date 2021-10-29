@@ -135,6 +135,11 @@ class LabDataFrame:
 
         self._formatted = pd.DataFrame(fill)
 
+        # todo
+        #  Forward fill the NaN values (by time)
+        #  this is required to prevent issues during plotting
+        #  since the calculated mean etc don't make any sense
+
         return self._formatted
 
     def _get_time_steps(self) -> list:
