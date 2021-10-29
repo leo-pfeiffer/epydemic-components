@@ -4,13 +4,13 @@ from pandas import DataFrame
 from lab_df import LabDataFrame
 
 
-def test_ldf(df, keys):
+def test_ldf(df, ts_keys, param_keys):
     ldf = LabDataFrame(df)
-    ldf.to_long(keys)
-    long = ldf.long
+    ldf.format(ts_keys, param_keys)
+    formatted = ldf.formatted
     mean = ldf.group_mean()
     std = ldf.group_std()
-    return long
+    return formatted
 
 
 def dataframe():
@@ -35,10 +35,11 @@ def dataframe():
 
 
 def json():
-    with JSONLabNotebook(name='seir_mobility_pre.json').open() as nb:
+    # with JSONLabNotebook(name='seir_mobility_pre.json').open() as nb:
+    with JSONLabNotebook(name='seirq_plc_pre.json').open() as nb:
         nb_df = nb.dataframe()
 
-    keys = [
+    ts_keys = [
         'epydemic.SEIR.S',
         'epydemic.SEIR.E',
         'epydemic.SEIR.I',
@@ -47,7 +48,11 @@ def json():
         'epydemic.SEIR.SE'
     ]
 
-    test_ldf(nb_df, keys)
+    param_keys = [
+        'epydemic.SEIRWithQuarantine.p_quarantine'
+    ]
+
+    test_ldf(nb_df, ts_keys, param_keys)
 
 
 if __name__ == '__main__':

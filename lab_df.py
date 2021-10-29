@@ -1,4 +1,4 @@
-from typing import List, Callable
+from typing import List, Callable, Optional, Dict, Any
 
 import numpy as np
 import pandas as pd
@@ -13,7 +13,7 @@ class LabDataFrame:
         if df is not None:
             assert isinstance(df, pd.DataFrame)
         self._df = df
-        self._long = None
+        self._formatted = None
 
     @property
     def df(self):
@@ -24,36 +24,47 @@ class LabDataFrame:
         self._df = df
 
     @property
-    def long(self):
-        if self._long is None:
+    def formatted(self):
+        if self._formatted is None:
             raise AttributeError(
-                'LabDataFrame.to_long(keys) must be called first.'
+                'LabDataFrame.format(keys) must be called first.'
             )
-        return self._long
+        return self._formatted
 
     @staticmethod
     def from_lab_notebook(notebook: LabNotebook):
         return LabDataFrame(notebook.dataframe())
 
-    def to_long(self, ts_keys: List[str]):
+    def format(self, ts_keys: List[str],
+               param_keys: Optional[List[str]] = None):
         """
-        Convert to long format data frame
+        Convert to correct format data frame
         :param ts_keys: List of time series keys for the data frame,
         e.g. SIR.INFECTED
+        :param param_keys: List of param keys for the data frame,
+        e.g. SEIRWithQuarantine.p_quarantine
         """
+
+        if param_keys is None:
+            param_keys = []
 
         num_experiments = len(self._df)
         experiment_ids = self._df.index.tolist()
 
-        # lists that will hold the values for the long data frame
-        ls_experiment_id = []  # experiment id
-        ls_time = []  # time step
-        ls_keys = []  # what the value refers to, e.g. a compartment
-        ls_value = []  # the value of the observation
-
         # time steps of the observations
         time_steps = self._get_time_steps()
         num_observations = len(time_steps)
+
+        # initialise fill values
+        fill = dict(
+            experiment_id=[],   # experiment id
+            time=[],            # time step
+            key=[],             # what the value refers to, e.g. a compartment
+            value=[]            # the value of the observation
+        )
+
+        for pk in param_keys:   # parameter keys
+            fill[pk] = []
 
         # for each key, fill the lists
         for key in ts_keys:
@@ -61,28 +72,31 @@ class LabDataFrame:
             ts = self._get_key_df(key, time_steps)
 
             # put the data into the `value` column
-            ls_value += reduce(lambda a, b: a + b, ts.values.tolist())
+            fill['value'] += reduce(lambda a, b: a + b, ts.values.tolist())
 
             # fill in the experiment IDs ...
-            ls_experiment_id += [
+            fill['experiment_id'] += [
                 experiment_ids[i] for i in range(num_experiments)
                 for _ in range(num_observations)
             ]
 
             # ... and the key
-            ls_keys += [key] * num_experiments * len(time_steps)
+            fill['key'] += [key] * num_experiments * len(time_steps)
 
             # ... and the time steps
-            ls_time += time_steps * num_experiments
+            fill['time'] += time_steps * num_experiments
 
-        self._long = pd.DataFrame({
-            'experiment_id': ls_experiment_id,
-            'time': ls_time,
-            'key': ls_keys,
-            'value': ls_value
-        })
+            # ... and the params
+            for pk in param_keys:
+                vals = self._df[pk].values.tolist()
+                fill[pk] += [
+                    vals[i] for i in range(num_experiments)
+                    for _ in range(num_observations)
+                ]
 
-        return self._long
+        self._formatted = pd.DataFrame(fill)
+
+        return self._formatted
 
     def _get_time_steps(self) -> list:
         """
@@ -94,7 +108,7 @@ class LabDataFrame:
 
         return self._df.loc[longest_obs].iloc[0][Monitor.OBSERVATIONS]
 
-    def _get_key_df(self, ts_key, time_steps):
+    def _get_key_df(self, ts_key, time_steps) -> pd.DataFrame:
         """
         Extract the values for a key
         :param ts_key: Time series key, e.g. SIR.INFECTED
@@ -107,33 +121,66 @@ class LabDataFrame:
 
     def group_apply(self, func: Callable):
         """
-        Apply the `func` callable to the long data frame.
+        Apply the `func` callable to the formatted data frame.
         :param func: A callable to be applied to the dataframe
         :return: The data frame grouped by time and key with the `func` applied.
         """
         raise NotImplementedError
-        # grouped = self.long.groupby(['time', 'key']).mean()
+        # grouped = self.formatted.groupby(['time', 'key']).mean()
         # grouped.reset_index(level=0, drop=True, inplace=True).reset_index(
         #     inplace=True)
         # return grouped
 
     def group_mean(self):
         """
-        Calculate the mean value per time per key column of the long df.
+        Calculate the mean value per time per key column of the formatted df.
         """
         # return self.group_apply(np.mean)
-        grouped = self.long.groupby(['time', 'key']).mean()
+        grouped = self.formatted.groupby(['time', 'key']).mean()
         grouped.reset_index(inplace=True)
         grouped.drop(['experiment_id'], axis=1, inplace=True)
         return grouped
 
     def group_std(self):
         """
-        Standard deviation per time per value in key column of the long df.
+        Standard deviation per time per value in key column of the formatted df.
         :return:
         """
         # return self.group_apply(np.std)
-        grouped = self.long.groupby(['time', 'key']).std()
+        grouped = self.formatted.groupby(['time', 'key']).std()
         grouped.reset_index(inplace=True)
         grouped.drop(['experiment_id'], axis=1, inplace=True)
         return grouped
+
+    def filter(self, filters: Dict[str, Any]) -> pd.DataFrame:
+        """
+        Filter the data frame by the values specified in `filters`.
+        :param filters: Dictionary containing columns as keys and filter values
+            as values
+        :return: The subset as a data frame.
+        """
+
+        return self._apply_filters(self.formatted, filters)
+
+    @staticmethod
+    def _apply_filters(df, filters: Dict[str, Any]):
+        """
+        Filter `df` by the conditions provided in `filters` where the keys
+        correspond to columns in `df` and values are the values to filter for.
+        :param df: Data frame to filter
+        :param filters: Dictionary with filter conditions
+        :return: filtered df
+        """
+
+        # todo
+        raise NotImplementedError
+
+        # # create array with true values only
+        # arr = np.array([True] * len(df))
+        #
+        # for k, v in filters.items():
+        #     # define filter (taking into account floating point imprecision) and
+        #     #  combine with previous filters
+        #     arr = arr & (lambda x: np.isclose(x, v))(df[k].values)
+        #
+        # return df.loc[arr]
