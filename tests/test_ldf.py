@@ -2,6 +2,7 @@ from epydemic import SIR, Monitor, ProcessSequence, ERNetwork, StochasticDynamic
 from epyc import Lab, JSONLabNotebook
 from pandas import DataFrame
 from lab_df import LabDataFrame
+from components.compartment_curves import CompartmentCurves
 
 
 def test_ldf(df, ts_keys, param_keys):
@@ -17,6 +18,9 @@ def test_ldf(df, ts_keys, param_keys):
     f_key = 'epydemic.SEIRWithQuarantine.p_quarantine'
     f_value = 0.5
     filtered = ldf.filter({f_key: f_value})
+
+    fig = CompartmentCurves(formatted, mean)
+
     return formatted
 
 

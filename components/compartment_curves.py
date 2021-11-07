@@ -1,34 +1,31 @@
 import plotly.express as px
-from plotly.graph_objects import Figure
-
-main_graph_props = dict(
-    x="time",
-    y="value",
-    color="key",
-    hover_name="key",
-    # category_orders={"compartment": ['S', 'E', 'I', 'V', 'R']}
-)
-
-fig_layout = dict(
-    margin=dict(l=10, r=10, t=10, b=0),
-    legend=dict(
-        orientation="h",
-        yanchor="bottom",
-        y=-0.15,
-        xanchor="center",
-        x=0.5
-    ),
-    autosize=True
-)
+from components.component import Component
 
 
-def make_main_graph(df, grouped_df):
-    fig_line = px.line(grouped_df, **main_graph_props)
-    fig_scat = px.scatter(df, **main_graph_props)
-    fig_scat.update_traces(showlegend=False, hoverinfo='none')
+class CompartmentCurves(Component):
 
-    fig = Figure(data=fig_line.data + fig_scat.data)
+    _graph_props = dict(
+        x="time",
+        y="value",
+        color="key",
+        hover_name="key",
+        # category_orders={"compartment": ['S', 'E', 'I', 'V', 'R']}
+    )
 
-    fig.update_layout(**fig_layout)
+    def __init__(self, df, grouped_df, **kwargs):
+        data = self._make_data(df, grouped_df)
+        super().__init__(data=data, **kwargs)
 
-    return fig
+    @property
+    def graph_props(self) -> dict:
+        return self._graph_props
+
+    def _make_data(self, df, grouped_df):
+        fig_line = px.line(grouped_df, **self.graph_props)
+        fig_scat = px.scatter(df, **self.graph_props)
+        fig_scat.update_traces(showlegend=False, hoverinfo='none')
+        return fig_line.data + fig_scat.data
+
+
+
+
