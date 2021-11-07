@@ -133,12 +133,7 @@ class LabDataFrame:
                     for _ in range(num_observations)
                 ]
 
-        self._formatted = pd.DataFrame(fill)
-
-        # todo
-        #  Forward fill the NaN values (by time)
-        #  this is required to prevent issues during plotting
-        #  since the calculated mean etc don't make any sense
+        self._formatted = pd.DataFrame(fill).ffill()
 
         return self._formatted
 
