@@ -213,3 +213,35 @@ class LabDataFrame:
             arr = arr & (lambda x: np.isclose(x, v))(df[k].values)
 
         return df.loc[arr]
+
+    @staticmethod
+    def epidemic_size_per_param(df, param, size_keys):
+        """
+        TODO: revise, esp size_keys
+        For the variable parameter `param` calculate the epidemic size
+        for each setting and for each experiment in `df`. Return the result
+        as a data frame with the columns `param` and 'epidemic_size'
+        :param df: Simulation df
+        :param param: Target variable parameter
+        :param size_keys: todo
+        :return: data frame
+        """
+
+        time_max = df.groupby(['experiment_id', param]).agg(
+            time_max=pd.NamedAgg(column='time', aggfunc='max')
+        ).to_dict()['time_max']
+
+        f = df.apply(lambda x: np.isclose(
+            time_max[(x['experiment_id'], x[param])],
+            x['time']) and x['key'] in size_keys, axis=1)
+
+        filtered = df[f]
+
+        epidemic_size = filtered.groupby(
+            ['experiment_id', param]
+        ).value.sum()
+
+        epidemic_size = epidemic_size.reset_index()
+        epidemic_size.rename(columns={'value': 'epidemic_size'}, inplace=True)
+
+        return epidemic_size[[param, 'epidemic_size']]

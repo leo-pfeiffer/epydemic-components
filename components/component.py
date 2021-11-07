@@ -20,17 +20,13 @@ class Component(Figure, ABC):
         autosize=True
     )
 
+    _graph_props = dict()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    @abstractmethod
     def _make_data(self, *args, **kwargs):
-        pass
-
-    @property
-    @abstractmethod
-    def graph_props(self) -> dict:
-        pass
+        raise NotImplementedError
 
     @property
     def fig_layout(self) -> dict:

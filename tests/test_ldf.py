@@ -1,6 +1,8 @@
 from epydemic import SIR, Monitor, ProcessSequence, ERNetwork, StochasticDynamics
 from epyc import Lab, JSONLabNotebook
 from pandas import DataFrame
+
+from components.marginal_scatter import MarginalScatter
 from lab_df import LabDataFrame
 from components.compartment_curves import CompartmentCurves
 
@@ -19,7 +21,8 @@ def test_ldf(df, ts_keys, param_keys):
     f_value = 0.5
     filtered = ldf.filter({f_key: f_value})
 
-    fig = CompartmentCurves(formatted, mean)
+    cc = CompartmentCurves(ldf)
+    ms = MarginalScatter(ldf, {}, f_key)
 
     return formatted
 
@@ -68,6 +71,7 @@ def json():
 
 
 if __name__ == '__main__':
+
     # dataframe()   # try this with a local lab
     json()        # try this from a JSON file
     ...
