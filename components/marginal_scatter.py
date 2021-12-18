@@ -7,14 +7,10 @@ class MarginalScatter(Component):
 
     _graph_props = dict()
 
-    def __init__(self, lab_df: LabDataFrame, param: str, filters: dict = {},
-                 size_keys=None, **kwargs):
+    def __init__(self, lab_df: LabDataFrame, param: str, size_keys=None,
+                 filters: dict = {}, **kwargs):
 
         # todo fix this ghastly size_keys stuff
-        if size_keys is None:
-            size_keys = ['epydemic.SEIR.R', 'epydemic.SEIR.E']
-        else:
-            size_keys = []
         data = self._make_data(lab_df, filters, param, size_keys)
         super().__init__(data=data, **kwargs)
 

@@ -26,8 +26,16 @@ class Component(Figure, ABC):
         super().__init__(**kwargs)
 
     def _make_data(self, *args, **kwargs):
+        """
+        Abstract method to be overwritten in child class.
+        """
         raise NotImplementedError
 
     @property
     def fig_layout(self) -> dict:
         return self._fig_layout
+
+    @fig_layout.setter
+    def fig_layout(self, layout):
+        self._fig_layout = layout
+

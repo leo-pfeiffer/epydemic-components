@@ -18,6 +18,7 @@ class LabDataFrame:
         self._formatted = None
         self._locus_keys = None
         self._param_keys = None
+        self._locus_order = None
 
     @property
     def df(self):
@@ -31,6 +32,10 @@ class LabDataFrame:
     def locus_keys(self):
         return self._locus_keys
 
+    @property
+    def locus_order(self):
+        return self._locus_order
+
     @locus_keys.setter
     def locus_keys(self, locus_keys):
         assert isinstance(locus_keys, list)
@@ -39,6 +44,7 @@ class LabDataFrame:
                 raise ValueError(f'The provided locus key {key} is not in the'
                                  f'columns of LabDataFrame.df')
         self._locus_keys = locus_keys
+        self._locus_order = locus_keys
 
     @property
     def param_keys(self):
@@ -245,3 +251,9 @@ class LabDataFrame:
         epidemic_size.rename(columns={'value': 'epidemic_size'}, inplace=True)
 
         return epidemic_size[[param, 'epidemic_size']]
+
+    def rename_keys(self, name_map):
+        df = self.formatted
+        df['key'] = df['key'].map(name_map)
+        self._formatted = df
+        self._locus_order = [name_map[l] for l in self._locus_order]
