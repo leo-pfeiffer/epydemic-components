@@ -15,7 +15,7 @@ a common epydemic data frame.
 [x] Compartment curves graph  
 [x] Marginal scatter plot  
 [-] Marginal heatmap plot  
-[ ] Compartment line chart under different settings  
+[x] Compartment line chart under different settings  
 [ ] Line chart new cases  
 [ ] Line chart cumulative cases  
 
