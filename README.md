@@ -7,10 +7,17 @@ a common epydemic data frame.
 
 `tests/` ... self-explanatory
 
-So far implemented:
-- LabDataFrame class as a wrapper to get the lab dataframe into the right format
-- Started on components library
+## Todo
+#### Data wrangling:
+[x] LabDataFrame class as a wrapper to get the lab dataframe into the right format  
 
-Todo:
-- Finish a working example with the compartment curve graph
-- Create a unified way of handling layout, etc...
+#### Components library  
+[x] Compartment curves graph  
+[x] Marginal scatter plot  
+[ ] Marginal heatmap plot  
+[ ] Compartment line chart under different settings  
+[ ] Line chart new cases  
+[ ] Line chart cumulative cases  
+
+#### Etc.
+[ ] Unified layout  
