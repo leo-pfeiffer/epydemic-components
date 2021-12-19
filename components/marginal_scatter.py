@@ -24,9 +24,3 @@ class MarginalScatter(Component):
         fig = px.scatter(epidemic_size, x=param, y="epidemic_size")
         fig.update_layout(**self.fig_layout)
         return fig.data
-
-
-
-
-
-

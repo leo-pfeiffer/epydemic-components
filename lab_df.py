@@ -229,7 +229,8 @@ class LabDataFrame:
         as a data frame with the columns `param` and 'epidemic_size'
         :param df: Simulation df
         :param param: Target variable parameter
-        :param size_keys: todo
+        :param size_keys: compartment names whose final occupation sums to the
+            epidemic size
         :return: data frame
         """
 
